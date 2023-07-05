@@ -1,5 +1,6 @@
 DEFAULT_RSPM_REPO_ID <-  "1" # cran
 DEFAULT_RSPM <-  "https://packagemanager.rstudio.com"
+DEFAULT_REQ_URL_EXT <- ""
 
 #' Query system requirements
 #'
@@ -72,15 +73,16 @@ system_requirements_internal <- function(os, os_release, root, package, execute,
   rspm <- Sys.getenv("RSPM_ROOT", DEFAULT_RSPM)
   rspm_repo_id <- Sys.getenv("RSPM_REPO_ID", DEFAULT_RSPM_REPO_ID)
   rspm_repo_url <- sprintf("%s/__api__/repos/%s", rspm, rspm_repo_id)
-
+  req_url_ext <- Sys.getenv("REQ_URL_EXT", DEFAULT_REQ_URL_EXT)
 
   if (!is.null(package)) {
     req_url <- sprintf(
-      "%s/sysreqs?all=false&pkgname=%s&distribution=%s&release=%s",
+      "%s/sysreqs?all=false&pkgname=%s&distribution=%s&release=%s%s",
       rspm_repo_url,
       paste(package, collapse = "&pkgname="),
       os,
-      os_release
+      os_release,
+      req_url_ext
     )
     res <- curl::curl_fetch_memory(req_url)
     data <- jsonlite::fromJSON(rawToChar(res$content), simplifyVector = FALSE)
